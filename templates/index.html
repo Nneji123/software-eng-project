@@ -1,62 +1,38 @@
-<head>
-    <meta charset="UTF-8">
-    <head>
-      <title></title>
-      <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
-	  <script src="{{ url_for('static', path='/index.js') }}"></script>
-    </head>
-  </head>
+<!-- Store this code in 'register.html' file inside the 'templates' folder -->
 
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title> Cartoonify App </title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">			
+	</head>
+	<body></br></br></br></br></br>
+		<div align="center">
+		<div align="center" class="border">
+			<div class="header">
+				<h1 class="word">Cartoonify</h1>
+                <h2 class="word">Generate Cartoon images with Cartoonify!</h2>
+			</div></br></br></br>
+			<h2 class="word">
+				<form action="{{ url_for('index') }}" method="post" enctype="multipart/form-data">
+				<div class="msg">{{ msg }}</div>
+                    <input placeholder="Image" type="file" id="file" name="file" required>
+					<input id="password" name="password" type="password" placeholder="Enter Your Password" class="textbox"/></br></br>
+					<input id="email" name="email" type="text" placeholder="Enter Your Email ID" class="textbox"/></br></br>
+					<input type="submit" class="btn" value="Upload"></br>
+				</form>
+                <div class="flex flex-col sm:flex-row mt-0 lg:w-1/2 mr-auto ml-auto">
+                    {% if submit %}
+                     
+                    <div class="h-full bg-gray-200 p-8 rounded">
+                    <img class="picture" src="{{ url_for('static', filename='output.png') }}">
+                    </div>
+               </div>
+                    {% endif %}
+               </div>
+			</h2>
 
-<h1>Cartoonify Application</h1>
-<div class="container" id="container">
-	<div class="form-container sign-up-container">
-		<form action="/signup" method="post">
-			<h1>Create Account</h1>
-			<!-- <div class="social-container">
-				<a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
-				<a href="#" class="social"><i class="fab fa-google-plus-g"></i></a>
-				<a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
-			</div> -->
-			<span>or use your email for registration</span>
-			<input type="text" placeholder="Username" placeholder="Username" id="username" name="username"/>
-			<input type="email" placeholder="Email" name="email" id="email" />
-			<input type="password" placeholder="Password" name="password" id="password"  />
-			<button type="submit">Sign Up</button>
-		</form>
-	</div>
-	<div class="form-container sign-in-container">
-		<form action="/signin" method="post">
-			<h1>Sign in</h1>
-			<span>or use your account</span>
-			<input type="text" placeholder="Username"  id="username" name="username"/>
-			<input type="email" placeholder="Email" name="email" id="email" />
-			<input type="password" placeholder="Password" name="password" id="password"  />
-			<a href="#">Forgot your password?</a>
-			<button type="submit">Sign In</button>
-		</form>
-	</div>
-	<div class="overlay-container">
-		<div class="overlay">
-			<div class="overlay-panel overlay-left">
-				<h1>Welcome Back!</h1>
-				<p>To keep connected with us please login with your personal info</p>
-				<button class="ghost" id="signIn">Sign In</button>
-			</div>
-			<div class="overlay-panel overlay-right">
-				<h1>Hello, Friend!</h1>
-				<p>Sign up to start cartoonifying your images!</p>
-				<button class="ghost" id="signUp">Sign Up</button>
-			</div>
 		</div>
-	</div>
-</div>
-
-<footer>
-	<p>
-		Created <i class="fa fa-heart"></i> by
-		<a target="_blank" href="https://github.com/Nneji123">Ifeanyi Nneji</a>
-		- Built by Group C Software Engineering COE 505
-		<!-- <a target="_blank" href="https://www.florin-pop.com/blog/2019/03/double-slider-sign-in-up-form/">here</a>. -->
-	</p>
-</footer>
+		</div>
+	</body>
+</html>
