@@ -19,7 +19,9 @@ from starlette.status import (
 
 load_dotenv()
 try:
-    if (os.getenv("POSTGRES_URI") is not None
+    if (
+        os.getenv("DATABASE_MODE") == "postgres"
+        and os.getenv("POSTGRES_URI") is not None
     ):
         POSTGRES_URI = os.getenv("POSTGRES_URI")
         POSTGRES_SSL = os.getenv("POSTGRES_SSL") #set to 'require' if connecting to an online database.
@@ -77,7 +79,10 @@ class PostgresAccess:
             c.execute(
                 """
             CREATE TABLE IF NOT EXISTS user_database (
-                id INTEGER PRIMARY KEY,
+                user_id TEXT PRIMARY KEY,
+                is_active INTEGER,
+                never_expire INTEGER,
+                expiration_date TEXT,
                 latest_query_date TEXT,
                 total_queries INTEGER)
             """
@@ -101,7 +106,7 @@ class PostgresAccess:
             print(e)
             # pass  # Column already exist
 
-    def create_key(self, username, email, password) -> dict:
+    def create_key(self, username, email, password, never_expire) -> dict:
         """
         The create_key function creates a new User for the user.
         It takes in the username, email, password and never_expire as parameters.
@@ -113,6 +118,7 @@ class PostgresAccess:
             username: Check if the username is already in use
             email: Check if the email is already in use
             password: Store the password in the database
+            never_expire: Determine if the user has an expiration date or not
 
         Returns:
             The user_id
@@ -137,14 +143,18 @@ class PostgresAccess:
             c.execute(
                 """
                     INSERT INTO user_database
-                    (user_id, latest_query_date, total_queries, username, email, password)
-                    VALUES(%s, %s, %s, %s, %s, %s)
+                    (user_id, is_active, never_expire, expiration_date, \
+                        latest_query_date, total_queries, username, email, password)
+                    VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                     user_id,
+                    1,
+                    1 if never_expire else 0,
                     (
                         datetime.utcnow() + timedelta(days=self.expiration_limit)
                     ).isoformat(timespec="seconds"),
+                    None,
                     0,
                     username,
                     email,
@@ -153,7 +163,7 @@ class PostgresAccess:
             )
             connection.commit()
 
-        return {"api-key": user_id}
+        return {"user_id": user_id}
 
     def renew_key(self, user_id: str, new_expiration_date: str) -> Optional[str]:
         """

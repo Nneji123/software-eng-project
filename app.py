@@ -1,3 +1,4 @@
+from _auth import api_key_router, api_key_security
 from fastapi import FastAPI, File, Form, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
@@ -5,15 +6,16 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.responses import FileResponse
 
+
 # from utils import *
 
 app = FastAPI()
+app.include_router(api_key_router)
 
 app = FastAPI(
     title="Cartoonify API Backend",
     description="""A simple API to convert images to cartoonified images.""",
     version="0.0.1",
-    docs_url=None,
     redoc_url=None,
 )
 
@@ -29,7 +31,7 @@ app.add_middleware(
 
 
 templates = Jinja2Templates(directory='templates/')
-app.mount('/template/static', StaticFiles(directory="static"), name="static")
+app.mount('/templates/static', StaticFiles(directory="static"), name="static")
 
 # favicon_path = "templates/assets/favicon.ico"
 
@@ -44,11 +46,28 @@ def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-# @app.get("/translation")
-# def home(request: Request):
-#     return templates.TemplateResponse("translation.html", {"request": request})
+@app.get("/index.js")
+def index_js(request: Request):
+    return templates.TemplateResponse("static/index.js", {"request": request})
+
+@app.get("/upload")
+def upload(request: Request):
+    return templates.TemplateResponse("upload.html", {"request": request})
+
+@app.get("/signup")
+def signup(request: Request):
+    return templates.TemplateResponse("signup.html", {"request": request})
 
 
+# @app.post("/signin")
+# async def signin(request: Request):
+#     if request.method == "POST":
+#         form = await request.form()
+#         if form["email"]:
+#             text = form["email"]
+#             email_validate(text)
+#         # else:
+            
 # @app.post("/translate")
 # async def home(request: Request):
 #     sumary = ""
