@@ -3,6 +3,7 @@ from pathlib import Path
 
 import os
 
+import bcrypt
 import cv2
 import numpy as np
 import onnxruntime as ort
@@ -42,7 +43,17 @@ def inference(image: np.ndarray) -> Image:
     results = MODEL_SESS.run(None, {"input_photo:0": image})
     output = (np.squeeze(results[0]) + 1.0) * 127.5
     output = np.clip(output, 0, 255).astype(np.uint8)
-    cv2.imwrite("/static/output.png", output)
+    cv2.imwrite("static/output.png", output)
     return "Output Saved!"
 
 
+def hash_password(password: str) -> str:
+    if password is not None:
+        try:
+            salt = bcrypt.gensalt()
+            hashed = bcrypt.hashpw(str(password).encode("utf-8"), salt)
+            return hashed.decode("utf-8")
+        except Exception as e:
+            print(e)
+    else:
+        return "Invalid Password entered"

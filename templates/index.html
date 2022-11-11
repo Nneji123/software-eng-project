@@ -10,21 +10,35 @@
 		<div align="center">
 		<div align="center" class="border">
 			<div class="header">
-				<h1 class="word">Cartoonify</h1>
-                <h2 class="word">Generate Cartoon images with Cartoonify!</h2>
+				<h1 class="h1">Cartoonify</h1>
+                <h2 class="h1">Generate Cartoon images with Cartoonify!</h2>
 			</div></br></br></br>
 			<h2 class="word">Upload your Image!</h2>
 				<form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
 
                     <input placeholder="Image" type="file" id="file" name="file" required>
-					<input type="submit" class="btn" value="Upload"></br>
-				</form>
-				<form action="/show_image" target="_blank">
-					<input type="submit" value="Show Image" />
-				</form>
-			</h2>
+					<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+				   	<button type='button' id ='retrieve'>Upload Image</button>
+				   <img src="" id="myimg" />
+				<script>
+				  $(document).ready(function() {
+					 $('#retrieve').click(function(){
+						 $.ajax({
+						 url: "{{ url_for ('output') }}",
+						 type: "GET",
+						 success: function(response) {
+							 $("#myimg").attr('src', '/static/' + response);
+						},
+						error: function(xhr) {
+						  //Do Something to handle error
+					   }
+					   });
+					 });
+				  });
+				</script>
+					<a href="{{ url_for('logout') }}" class="btn">Logout</a>
+		</div>
+		</div>
 
-		</div>
-		</div>
 	</body>
 </html>

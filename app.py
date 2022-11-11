@@ -4,10 +4,11 @@ import sqlite3 as sql
 import cv2
 import io
 from PIL import Image
+import numpy as np
 from utils import *
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
 app.secret_key = 'testsecret'
 
 @app.route('/')
@@ -20,13 +21,14 @@ def login():
         con = sql.connect('database.db')
         cur = con.cursor()
         # cur.execute("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, email TEXT NOT NULL, password TEXT NOT NULL);")
+        password = hash_password(password)
         cur.execute('SELECT * FROM users WHERE username=? AND password=?', (username, password))
         account = cur.fetchone()
         if account:
             session['loggedin'] = True
             session['id'] = account['id']
             session['username'] = account['username']
-            session['email'] = account['email']
+            # session['email'] = account['email']
             msg = 'Logged in successfully !'
             return render_template('index.html', msg = msg)
         else:
@@ -50,7 +52,7 @@ def register():
         # account = retrieve_users()
         con = sql.connect('database.db')
         cur = con.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, email TEXT NOT NULL, password TEXT NOT NULL);")
+        cur.execute("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, email TEXT, password TEXT);")
         cur.execute('SELECT * FROM users WHERE username=? OR email=?', (username, email))
         account = cur.fetchone()
         if account:
@@ -62,7 +64,8 @@ def register():
         elif not username or not password or not email:
             msg = 'Please fill out the form !'
         else:
-            cur.execute('INSERT INTO  users VALUES (NULL, ?, ?, ?)', (username, password, email, ))
+            password = hash_password(password)
+            cur.execute('INSERT INTO  users VALUES (NULL,?, ?, ?)', (username, password, email,))
             msg = 'You have successfully registered !'
             return render_template('index.html')  
         
@@ -76,19 +79,30 @@ def register():
 async def upload():
     if request.method == "POST":
         f = request.files['file']
-        f.save(f.filename)
-        image_ = str(f.filename)
+        f.save('image.png')
+        image_ = f
         submit= ''
         try:
-            image = Image.open(image_)
+            image = Image.open('image.png')
             image = np.array(image)
             inference(image=image)
-            # return submit
+            submit= 'View Your Image'
+            from flask import send_from_directory
+            return send_from_directory("static", "output.png"), render_template('index.html')
         except ValueError:
             vals = "Error! Please upload a valid image type."
             return vals
 
+def delete_file():
+    if os.path.exists('static/output.png'):
+        os.remove('static/output.png')
+        print('file removed')
 
+@app.route('/output')
+def output():
+    return 'output.png', delete_file()
+    
+#     return send_from_directory(filename)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
