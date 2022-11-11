@@ -52,6 +52,7 @@ def register():
         con = sql.connect('database.db')
         cur = con.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, email TEXT, password TEXT);")
+        con.commit()
         cur.execute('SELECT * FROM users WHERE username=? OR email=?', (username, email))
         account = cur.fetchone()
         if account:
@@ -65,6 +66,7 @@ def register():
         else:
             password = hash_password(password)
             cur.execute('INSERT INTO  users VALUES (NULL,?, ?, ?)', (username, password, email,))
+            con.commit()
             msg = 'You have successfully registered !'
             return render_template('index.html')  
         
@@ -80,14 +82,14 @@ async def upload():
         f = request.files['file']
         f.save('image.png')
         image_ = f
-        submit= ''
+        sumary= ''
         try:
             image = Image.open('image.png')
             image = np.array(image)
             inference(image=image)
-            submit= 'View Your Image'
-            from flask import send_from_directory
-            return send_from_directory("static", "output.png"), render_template('index.html')
+            sumary= 'View Your Image'
+            #from flask import send_from_directory
+            return render_template('index.html', {'sumary': 'Display Image'})
         except ValueError:
             vals = "Error! Please upload a valid image type."
             return vals
@@ -99,7 +101,8 @@ def delete_file():
 
 @app.route('/output')
 def output():
-    return 'output.png', delete_file()
+    cat_image = 'static/output.png'
+    return 'output.png'
     
 #     return send_from_directory(filename)
 

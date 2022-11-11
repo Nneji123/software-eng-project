@@ -14,31 +14,30 @@
                 <h2 class="h1">Generate Cartoon images with Cartoonify!</h2>
 			</div></br></br></br>
 			<h2 class="word">Upload your Image!</h2>
-				<form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+				<form action="/upload" method="post" enctype="multipart/form-data">
+					<input placeholder="JPG" type="file" id="file" name="file" class="block" required>
+                </div>
+                <input
+                  class="button"
+                  type="submit"
+                  value="upload File"
+                />
+              </div>
+            </form>
+          </div>
+          <div class="flex flex-col sm:flex-row mt-0 lg:w-1/2 mr-auto ml-auto">
+             {% if sumary %}
+              
+              <div class="h-full bg-gray-200 p-8 rounded">
 
-                    <input placeholder="Image" type="file" id="file" name="file" required>
-					<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-				   	<button type='button' id ='retrieve'>Upload Image</button>
-				   <img src="" id="myimg" />
-				<script>
-				  $(document).ready(function() {
-					 $('#retrieve').click(function(){
-						 $.ajax({
-						 url: "{{ url_for ('output') }}",
-						 type: "GET",
-						 success: function(response) {
-							 $("#myimg").attr('src', '/static/' + response);
-						},
-						error: function(xhr) {
-						  //Do Something to handle error
-					   }
-					   });
-					 });
-				  });
-				</script>
-					<a href="{{ url_for('logout') }}" class="btn">Logout</a>
-		</div>
-		</div>
-
+                <h2 class="text-lg text-gray-700 font-bold mb-3">Extracted Number Plate</h2>
+                <h3 class="fixed accent block">{{sumary}}</h3>
+                <div class="wrapper block pictureWrapper">
+                  <img class="picture" src="gen.png" alt="Extracted Image">
+              </div>
+        </div>
+             {% endif %}
+        </div>
+            
 	</body>
 </html>
