@@ -49,7 +49,6 @@ def register():
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
-        # account = retrieve_users()
         con = sql.connect('database.db')
         cur = con.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, email TEXT, password TEXT);")
