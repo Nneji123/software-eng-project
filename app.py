@@ -1,11 +1,11 @@
 import re
 from flask import Flask, render_template, request, redirect, url_for, session
-from database import insert_user, retrieve_users
 import sqlite3 as sql
 import cv2
 import io
 from PIL import Image
 from utils import *
+
 
 app = Flask(__name__)
 app.secret_key = 'testsecret'
@@ -19,6 +19,7 @@ def login():
         password = request.form['password']
         con = sql.connect('database.db')
         cur = con.cursor()
+        # cur.execute("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, email TEXT NOT NULL, password TEXT NOT NULL);")
         cur.execute('SELECT * FROM users WHERE username=? AND password=?', (username, password))
         account = cur.fetchone()
         if account:
@@ -49,6 +50,7 @@ def register():
         # account = retrieve_users()
         con = sql.connect('database.db')
         cur = con.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, email TEXT NOT NULL, password TEXT NOT NULL);")
         cur.execute('SELECT * FROM users WHERE username=? OR email=?', (username, email))
         account = cur.fetchone()
         if account:
@@ -70,25 +72,21 @@ def register():
 
 
 
-@app.route('index', methods=['GET', 'POST'])
+@app.route('/upload', methods =['GET', 'POST'])
 async def upload():
     if request.method == "POST":
-        form = await request.form()
+        f = request.files['file']
+        f.save(f.filename)
+        image_ = str(f.filename)
         submit= ''
-        if form["file"]:
-            files = form["file"]
-            contents = io.BytesIO(await files.read())
-            file_bytes = np.asarray(bytearray(contents.read()), dtype=np.uint8)
-            img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-            cv2.imwrite("./images/image.jpg", img)
-            try:
-                image = Image.open('./images/image.jpg')
-                image = np.array(image)
-                inference(image=image)
-                return submit
-            except ValueError:
-                vals = "Error! Please upload a valid image type."
-                return vals
+        try:
+            image = Image.open(image_)
+            image = np.array(image)
+            inference(image=image)
+            # return submit
+        except ValueError:
+            vals = "Error! Please upload a valid image type."
+            return vals
 
 
 

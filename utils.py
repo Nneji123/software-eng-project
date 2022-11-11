@@ -13,10 +13,10 @@ _sess_options.intra_op_num_threads = os.cpu_count()
 MODEL_SESS = ort.InferenceSession(
     "model.onnx", _sess_options, providers=["CPUExecutionProvider"]
 )
-import sys
-os.chdir(sys._MEIPASS)
-os.system('included\\model.onnx')
-os.system('included\\logo.ico')
+# import sys
+# os.chdir(sys._MEIPASS)
+# os.system('included\\model.onnx')
+# os.system('included\\logo.ico')
 
 
 

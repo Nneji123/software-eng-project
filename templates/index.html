@@ -14,20 +14,14 @@
                 <h2 class="word">Generate Cartoon images with Cartoonify!</h2>
 			</div></br></br></br>
 			<h2 class="word">Upload your Image!</h2>
-    
-				<form action="{{ url_for('index') }}" method="post" enctype="multipart/form-data">
+				<form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
 
                     <input placeholder="Image" type="file" id="file" name="file" required>
 					<input type="submit" class="btn" value="Upload"></br>
 				</form>
-                <div class="flex flex-col sm:flex-row mt-0 lg:w-1/2 mr-auto ml-auto">
-                    {% if submit %}
-                    <div class="h-full bg-gray-200 p-8 rounded">
-                    <img class="picture" src="{{ url_for('static', filename='output.png') }}">
-                    </div>
-               </div>
-                    {% endif %}
-               </div>
+				<form action="/show_image" target="_blank">
+					<input type="submit" value="Show Image" />
+				</form>
 			</h2>
 
 		</div>
