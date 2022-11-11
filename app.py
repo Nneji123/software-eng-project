@@ -6,7 +6,7 @@ import io
 from PIL import Image
 import numpy as np
 from utils import *
-
+import bcrypt
 
 app = Flask(__name__, static_folder="static")
 app.secret_key = 'testsecret'
@@ -21,16 +21,17 @@ def login():
         con = sql.connect('database.db')
         cur = con.cursor()
         # cur.execute("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, email TEXT NOT NULL, password TEXT NOT NULL);")
-        password = hash_password(password)
+        print(password)
         cur.execute('SELECT * FROM users WHERE username=? AND password=?', (username, password))
         account = cur.fetchone()
-        if account:
+
+        if account and check_password_hashed(hash_password(password))==True:
             session['loggedin'] = True
             session['id'] = account['id']
             session['username'] = account['username']
             # session['email'] = account['email']
             msg = 'Logged in successfully !'
-            return render_template('index.html', msg = msg)
+            return render_template('index.html')
         else:
             msg = 'Incorrect username / password !'
     return render_template('login.html', msg = msg)
@@ -65,7 +66,7 @@ def register():
             msg = 'Please fill out the form !'
         else:
             password = hash_password(password)
-            cur.execute('INSERT INTO  users VALUES (NULL,?, ?, ?)', (username, password, email,))
+            cur.execute('INSERT INTO  users VALUES (NULL,?, ?, ?)', (username, email, password, ))
             con.commit()
             msg = 'You have successfully registered !'
             return render_template('index.html')  
@@ -74,37 +75,46 @@ def register():
         msg = 'Please fill out the form !'
     return render_template('register.html', msg = msg)
 
+import os
+from flask import Flask, request, redirect, render_template
+from werkzeug.utils import secure_filename
+from PIL import Image
+import base64
+from io import BytesIO
 
 
-@app.route('/upload', methods =['GET', 'POST'])
-async def upload():
-    if request.method == "POST":
-        f = request.files['file']
-        f.save('image.png')
-        image_ = f
-        sumary= ''
-        try:
-            image = Image.open('image.png')
-            image = np.array(image)
-            inference(image=image)
-            sumary= 'View Your Image'
-            #from flask import send_from_directory
-            return render_template('index.html', {'sumary': 'Display Image'})
-        except ValueError:
-            vals = "Error! Please upload a valid image type."
-            return vals
+allowed_exts = {'jpg', 'jpeg','png','JPG','JPEG','PNG'}
 
-def delete_file():
-    if os.path.exists('static/output.png'):
-        os.remove('static/output.png')
-        print('file removed')
 
-@app.route('/output')
-def output():
-    cat_image = 'static/output.png'
-    return 'output.png'
-    
-#     return send_from_directory(filename)
+def check_allowed_file(filename):
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_exts
+
+
+
+@app.route("/index",methods=['GET', 'POST'])
+def index():
+	if request.method == 'POST':
+		if 'file' not in request.files:
+			print('No file attached in request')
+			return redirect(request.url)
+		file = request.files['file']
+		if file.filename == '':
+			print('No file selected')
+			return redirect(request.url)
+		if file and check_allowed_file(file.filename):
+			filename = secure_filename(file.filename)
+			print(filename)
+			img = Image.open(file.stream).resize((320,320))
+            
+			with BytesIO() as buf:
+				img.save(buf, 'jpeg')
+				image_bytes = buf.getvalue()
+			encoded_string = base64.b64encode(image_bytes).decode()         
+		return render_template('index.html', img_data=encoded_string), 200
+	else:
+		return render_template('index.html', img_data=""), 200
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

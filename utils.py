@@ -46,14 +46,24 @@ def inference(image: np.ndarray) -> Image:
     cv2.imwrite("static/output.png", output)
     return "Output Saved!"
 
+salt = bcrypt.gensalt()
 
 def hash_password(password: str) -> str:
     if password is not None:
         try:
-            salt = bcrypt.gensalt()
             hashed = bcrypt.hashpw(str(password).encode("utf-8"), salt)
             return hashed.decode("utf-8")
         except Exception as e:
             print(e)
     else:
         return "Invalid Password entered"
+
+def check_password_hashed(password: str) -> str:
+    if password is not None:
+        try:
+            if bcrypt.checkpw(password, salt):
+                return True
+            else: 
+                return False
+        except Exception as e:
+            print(e)
